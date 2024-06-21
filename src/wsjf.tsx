@@ -207,7 +207,13 @@ var formObserver = (context) => {
             storedFields.rvField &&
             storedFields.wsjfField
           ) {
-            updateWSJFOnForm(storedFields);
+            if (storedFields.enableComputeOnLoad == 'Yes') {
+              updateWSJFOnForm(storedFields);
+            } else {
+              console.log(
+                "WSJF score calculation has been disabled. Skipping."
+              );  
+            }
           } else {
             console.log(
               "Unable to calculate WSJF, please configure fields on the collection settings page."

@@ -104,6 +104,29 @@ export class Settings {
         };
     }
 
+    private getStringComboOptions(id, source: string[], initialValue: string):IComboOptions {
+        var that = this;
+        const currentInitialValue = initialValue ? initialValue.toString(): null
+        return {
+            id: id,
+            mode: "drop",
+            source: source,
+            enabled: true,
+            value: currentInitialValue,
+            change: function () {
+                that._changeMade = true;
+                let val: string = this.getText();
+
+                switch (this._id) {
+                    case "enableComputeOnLoad":
+                        that._selectedFields.enableComputeOnLoad = val;
+                        break;
+                }
+                that.updateSaveButton();
+            }
+        };
+    }
+
     public initialize() {
         let hubContent = $(".hub-content");
         let uri = VSS.getWebContext().collection.uri + "_admin/_process";
@@ -157,6 +180,9 @@ export class Settings {
         let roundToContainer = $("<div />").addClass("settings-control").appendTo(container);
         $("<label />").text("Round to X decimals (-1 = don't round)").appendTo(roundToContainer);
 
+        let enableComputeOnLoadContainer = $("<div />").addClass("settings-control").appendTo(container);
+        $("<label />").text("Enable computing on work item form load").appendTo(enableComputeOnLoadContainer);
+
         VSS.getService<IExtensionDataService>(VSS.ServiceIds.ExtensionData).then((dataService: IExtensionDataService) => {
             dataService.getValue<StoredFieldReferences>("storedFields").then((storedFields:StoredFieldReferences) => {
                 if (storedFields) {
@@ -172,7 +198,8 @@ export class Settings {
                         rvField: null,
                         effortField: "Microsoft.VSTS.Scheduling.Effort",
                         wsjfField: null,
-                        roundTo: 0
+                        roundTo: 0,
+                        enableComputeOnLoad: 'No'
                     };
                 }
 
@@ -183,6 +210,7 @@ export class Settings {
                     Controls.create(Combo, effortContainer, this.getComboOptions("effort", fieldList, this._selectedFields.effortField));
                     Controls.create(Combo, wsjfContainer, this.getComboOptions("wsjf", fieldList, this._selectedFields.wsjfField));
                     Controls.create(Combo, roundToContainer, this.getNumeralComboOptions("roundTo", [-1,0,1,2,3], this._selectedFields.roundTo));
+                    Controls.create(Combo, enableComputeOnLoadContainer, this.getStringComboOptions("enableComputeOnLoad", ['No','Yes'], this._selectedFields.enableComputeOnLoad));
                     this.updateSaveButton();
 
                     VSS.notifyLoadSucceeded();
@@ -203,7 +231,7 @@ export class Settings {
 
     private updateSaveButton() {
         var buttonState = (this._selectedFields.bvField && this._selectedFields.tcField && this._selectedFields.rvField &&
-                            this._selectedFields.effortField && this._selectedFields.wsjfField) && this._changeMade
+                            this._selectedFields.effortField && this._selectedFields.wsjfField && this._selectedFields.enableComputeOnLoad) && this._changeMade
                             ? Menus.MenuItemState.None : Menus.MenuItemState.Disabled;
 
         // Update the disabled state

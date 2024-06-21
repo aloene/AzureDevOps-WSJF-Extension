@@ -5,5 +5,6 @@ export interface StoredFieldReferences {
     rvField: string,
     effortField: string,
     wsjfField: string
-    roundTo: number
+    roundTo: number,
+    enableComputeOnLoad: string
 }
